@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# pylint: disable=C0103
+
+"""
+git pre-commit hook.
+"""
+
+import json
+import subprocess
+import sys
+
+
+def against():
+    """ resolve previous rev """
+    try:
+        subprocess.check_call("git rev-parse --verify HEAD".split())
+        return "HEAD"
+    except subprocess.CalledProcessError:
+        return "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+
+def check_json(filename):
+    """ check if json loads """
+    with open(filename, mode="r") as jf:
+        try:
+            json.load(jf)
+        except ValueError, e:
+            print "{} failed verification:\n{}".format(filename, e)
+            sys.exit(1)
+
+
+def check_whitespace(version=None):
+    """ inspired by https://github.com/mozilla/moz-git-tools """
+    if not version:
+        version = against()
+    try:
+        subprocess.check_call("git diff-index --check --cached {}".format(version).split())
+    except subprocess.CalledProcessError:
+        print "whitespace verification failed"
+        sys.exit(1)
+
+
+def staged_files():
+    """ generate list of staged files """
+    for filename in subprocess.check_output("git diff --name-only --staged --diff-filter=AM".split()).split():
+        yield filename.strip()
+
+
+def verify(filelist):
+    """ run file-level checks """
+    for json_file in (x for x in filelist if x.endswith(".json")):
+        check_json(json_file)
+
+
+if __name__ == '__main__':
+    verify(staged_files())
+    check_whitespace()
