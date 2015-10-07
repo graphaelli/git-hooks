@@ -4,6 +4,7 @@
 """
 git pre-commit hook.
 """
+from __future__ import print_function
 
 import json
 import subprocess
@@ -24,8 +25,8 @@ def check_json(filename):
     with open(filename, mode="r") as jf:
         try:
             json.load(jf)
-        except ValueError, e:
-            print "{} failed verification:\n{}".format(filename, e)
+        except ValueError as e:
+            print("{} failed verification:\n{}".format(filename, e))
             sys.exit(1)
 
 
@@ -36,14 +37,14 @@ def check_whitespace(version=None):
     try:
         subprocess.check_call("git diff-index --check --cached {}".format(version).split())
     except subprocess.CalledProcessError:
-        print "whitespace verification failed"
+        print("whitespace verification failed")
         sys.exit(1)
 
 
 def staged_files():
     """ generate list of staged files """
     for filename in subprocess.check_output("git diff --name-only --staged --diff-filter=AM".split()).split():
-        yield filename.strip()
+        yield filename.strip().decode('utf-8')
 
 
 def verify(filelist):
