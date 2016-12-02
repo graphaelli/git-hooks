@@ -30,6 +30,19 @@ def check_json(filename):
             sys.exit(1)
 
 
+def check_go(filename):
+    """ check that goimports runs and doesn't change anything """
+    try:
+        output = subprocess.check_output(["goimports", "-d", filename])
+        if output:
+            print("goimports verification failed: ")
+            print(output.decode('utf-8'))
+            sys.exit(2)
+    except subprocess.CalledProcessError:
+        print("go verification failed")
+        sys.exit(1)
+
+
 def check_whitespace(version=None):
     """ inspired by https://github.com/mozilla/moz-git-tools """
     if not version:
@@ -49,9 +62,11 @@ def staged_files():
 
 def verify(filelist):
     """ run file-level checks """
-    for json_file in (x for x in filelist if x.endswith(".json")):
-        check_json(json_file)
-
+    for f in filelist:
+        if f.endswith(".json"):
+            check_json(f)
+        if f.endswith(".go"):
+            check_go(f)
 
 if __name__ == '__main__':
     verify(staged_files())
