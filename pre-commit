@@ -33,7 +33,7 @@ def check_json(filename):
 def check_go(filename):
     """ check that goimports runs and doesn't change anything """
     try:
-        output = subprocess.check_output(["goimports", "-d", filename])
+        output = subprocess.check_output(["goimports", "-local", "github.com/elastic", "-d", filename])
         if output:
             print("goimports verification failed: ")
             print(output.decode('utf-8'))
