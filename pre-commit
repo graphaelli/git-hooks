@@ -38,7 +38,7 @@ def check_go(filename):
             print("goimports verification failed: ")
             print(output.decode('utf-8'))
             sys.exit(2)
-        output = subprocess.check_output(["go", "vet", filename])
+        output = subprocess.check_output(["go", "tool", "vet", filename])
         if output:
             print("go vet verification failed: ")
             print(output.decode('utf-8'))
